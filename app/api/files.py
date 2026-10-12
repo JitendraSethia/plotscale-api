@@ -1,5 +1,6 @@
 import tempfile
 from pathlib import Path
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
@@ -15,10 +16,11 @@ from app.services.file_loader import load_features
 from app.services.measurements import measure
 
 router = APIRouter(prefix="/api/files", tags=["files"])
+DbSession = Annotated[Session, Depends(get_db)]
 
 
 @router.post("/", response_model=FileInfo, status_code=201)
-def upload_file(file: UploadFile, db: Session = Depends(get_db)):
+def upload_file(file: UploadFile, db: DbSession):
     """Upload a .kml file or a zipped shapefile; its features are extracted and measured."""
     suffix = storage.validate_suffix(file.filename)
     with tempfile.TemporaryDirectory() as tmp:
@@ -44,12 +46,12 @@ def upload_file(file: UploadFile, db: Session = Depends(get_db)):
 
 
 @router.get("/{file_id}/", response_model=FileInfo)
-def get_file(file_id: str, db: Session = Depends(get_db)):
+def get_file(file_id: str, db: DbSession):
     return _get_file_or_404(db, file_id)
 
 
 @router.get("/{file_id}/measurements/", response_model=FileMeasurements)
-def get_measurements(file_id: str, db: Session = Depends(get_db)):
+def get_measurements(file_id: str, db: DbSession):
     record = _get_file_or_404(db, file_id)
     return FileMeasurements(
         file_id=record.id,

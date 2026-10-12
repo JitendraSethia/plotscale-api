@@ -51,7 +51,7 @@ def _read_layer(path: Path, layer: str, start_index: int) -> list[LoadedFeature]
     features = []
     for row, wkb in enumerate(geometries):
         properties = {
-            name: _clean(column[row]) for name, column in zip(meta["fields"], columns)
+            name: _clean(column[row]) for name, column in zip(meta["fields"], columns, strict=True)
         }
         features.append(
             LoadedFeature(

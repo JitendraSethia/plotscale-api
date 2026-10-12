@@ -8,7 +8,9 @@ from app.services import storage
 from tests.conftest import FIXTURES
 
 
-@pytest.mark.parametrize("filename, suffix", [("a.kml", ".kml"), ("A.KML", ".kml"), ("b.zip", ".zip")])
+@pytest.mark.parametrize(
+    "filename, suffix", [("a.kml", ".kml"), ("A.KML", ".kml"), ("b.zip", ".zip")]
+)
 def test_validate_suffix_accepts_kml_and_zip(filename, suffix):
     assert storage.validate_suffix(filename) == suffix
 

@@ -70,7 +70,10 @@ def test_multipolygon_area_is_sum_of_parts():
 
 
 def test_multilinestring_length_is_sum_of_parts():
-    parts = [LineString([(88.36, 22.57), (88.37, 22.57)]), LineString([(88.38, 22.57), (88.38, 22.58)])]
+    parts = [
+        LineString([(88.36, 22.57), (88.37, 22.57)]),
+        LineString([(88.38, 22.57), (88.38, 22.58)]),
+    ]
 
     whole = measure(MultiLineString(parts), WGS84).length_m
 
@@ -98,7 +101,9 @@ def test_altitude_is_ignored():
     assert measure(force_3d(square, 50), WGS84).area_m2 == measure(square, WGS84).area_m2
 
 
-@pytest.mark.parametrize("geometry", [Point(88.36, 22.57), MultiPoint([(88.36, 22.57), (88.37, 22.58)])])
+@pytest.mark.parametrize(
+    "geometry", [Point(88.36, 22.57), MultiPoint([(88.36, 22.57), (88.37, 22.58)])]
+)
 def test_points_are_not_measured(geometry):
     result = measure(geometry, WGS84)
 
