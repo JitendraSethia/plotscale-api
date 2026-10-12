@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Kolkata survey</name>
+    <Placemark>
+      <name>Plot A</name>
+      <description>1 km x 1 km square</description>
+      <Polygon>
+        <outerBoundaryIs>
+          <LinearRing>
+            <coordinates>
+              88.363900,22.572600,0 88.373624,22.572600,0 88.373624,22.581630,0
+              88.363900,22.581630,0 88.363900,22.572600,0
+            </coordinates>
+          </LinearRing>
+        </outerBoundaryIs>
+      </Polygon>
+    </Placemark>
+    <Placemark>
+      <name>Access road</name>
+      <LineString>
+        <coordinates>88.363900,22.572600 88.373624,22.572600 88.373624,22.581630</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Site gate</name>
+      <Point>
+        <coordinates>88.363900,22.572600</coordinates>
+      </Point>
+    </Placemark>
+  </Document>
+</kml>
