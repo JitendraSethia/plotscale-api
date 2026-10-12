@@ -43,8 +43,8 @@ def _read_layer(path: Path, layer: str, start_index: int) -> list[LoadedFeature]
     )
     if meta["crs"] is None:
         raise FileError(
-            "Coordinate system is unknown (shapefile has no .prj file). "
-            "Include the .prj file so measurements can be calculated correctly."
+            "Coordinate system is unknown: the shapefile's .prj file is missing or unreadable. "
+            "Include a valid .prj file so measurements can be calculated correctly."
         )
 
     columns = [values.tolist() for values in field_data]
