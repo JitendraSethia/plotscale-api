@@ -4,6 +4,13 @@ A FastAPI service that accepts a KML file or a zipped Shapefile, extracts every 
 
 ## Setup
 
+### Get the code
+
+```bash
+git clone https://github.com/JitendraSethia/Untouched.git
+cd Untouched
+```
+
 ### Run locally
 
 Requires Python 3.11+.
@@ -244,20 +251,20 @@ Known limits: features crossing the antimeridian are not split before measuring;
 
 ## Learnings
 
-_To be written._
-
-- What was new to me about coordinate systems and why degrees can't be used for area?
-- What did I learn about GDAL drivers (KML vs LIBKML) and shapefile components?
-- Which edge case surprised me most while testing?
-- What would I do differently if starting again?
+- Latitude and longitude are angles, not distances, and one degree of longitude shrinks from about 111 km at the equator to zero at the poles. That is why I project every feature to a UTM zone, which uses meters, before measuring it.
+- A CRS (coordinate reference system) tells you what the numbers in a file mean, and for a shapefile it is stored in the .prj file. Without it the numbers could be degrees or meters, so I return a 422 instead of guessing and giving an area that looks right but is not.
+- I pick the UTM zone from each feature's own centroid, so a file that spans two zones is still measured in the right one. To check accuracy, my tests compare against pyproj's geodesic results: a 1 km square near Kolkata is within 0.03%, and one near Sydney is within 0.01%.
+- A self-intersecting polygon has no clear area. Shapely can repair it, but that changes the user's shape without telling them, so I mark it INVALID with the reason and keep measuring the other features in the file.
+- An uploaded file cannot be trusted, so I reject zip entries with paths like `../../x` that would write outside the target folder (zip-slip) and save the extracted parts under fixed names. I also limit the upload and unzipped sizes, and do all the work in a temporary folder that is deleted even when processing fails.
+- Small details in geo libraries matter. EPSG:4326 officially lists latitude first, so I set `always_xy=True` in pyproj to keep coordinates in (longitude, latitude) order.
+- pyogrio reads both KML and shapefiles through GDAL, and its wheels bundle GDAL, so the Docker image needed no extra system packages. I checked that the KML driver worked inside the Docker image before building the rest of the code on it.
 
 ## Future scope
 
-_To be written._
-
-- Pagination for the measurements endpoint on files with many features
-- Asynchronous processing for large files (background worker, polling on `status`)
-- Database migrations (Alembic) and PostgreSQL/PostGIS
-- More formats (KMZ, GeoJSON, GeoPackage)
-- Antimeridian-crossing and polar features (split geometries, polar stereographic projections)
-- Authentication and per-user file lists
+- Add pagination to the measurements endpoint. Right now a large file returns every feature in one response.
+- Move processing to a background worker for big uploads. The PROCESSING, COMPLETED and FAILED statuses already exist, so the API would not need to change.
+- Use Alembic migrations instead of creating tables at startup, and move from SQLite to Postgres with PostGIS.
+- Add authentication, and cap the request size at the proxy or gateway. The current 20 MB limit is only checked after the framework has already buffered the upload.
+- Support more input formats such as GeoJSON, KMZ and GeoPackage. GDAL can already read them, so most of the work is validation and tests.
+- Replace the simple KML content check, which only looks for a `<kml` tag in the first 4 KB of the file, with proper XML validation.
+- Handle features that cross the 180th meridian, which are not split before measuring today, and features near the poles, which are outside UTM and currently marked UNSUPPORTED.
